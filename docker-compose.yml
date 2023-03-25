@@ -1,0 +1,37 @@
+version: "3"
+
+services:
+  db_transactional:
+    image: postgres
+    environment:
+      POSTGRES_USER: user
+      POSTGRES_PASSWORD: password
+      POSTGRES_DB: transactional_db
+    ports:
+      - "5432:5432"
+    volumes:
+      - ./init_transactional_db.sql:/docker-entrypoint-initdb.d/init_transactional_db.sql
+
+  db_analytics:
+    image: postgres
+    environment:
+      POSTGRES_USER: user
+      POSTGRES_PASSWORD: password
+      POSTGRES_DB: analytics_db
+    ports:
+      - "5433:5432"
+
+  etl:
+    build: .
+    depends_on:
+      - db_transactional
+      - db_analytics
+    environment:
+      POSTGRES_USER: user
+      POSTGRES_PASSWORD: password
+      POSTGRES_HOST: db_transactional
+      POSTGRES_DB: transactional_db
+      POSTGRES_ANALYTICS_HOST: db_analytics
+      POSTGRES_ANALYTICS_DB: analytics_db
+    volumes:
+      - ./extracted_data:/app/extracted_data
