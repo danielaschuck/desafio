@@ -1,13 +1,18 @@
 
+import psycopg2
 
-WORKDIR /app
+# conexão com o banco de dados
+conn = psycopg2.connect(
+    host="localhost",
+    port="5433",
+    database="analytics_db",
+    user="user",
+    password="password"
+)
 
-COPY requirements.txt .
-
-RUN pip install --no-cache-dir -r requirements.txt
-
-RUN apt-get update && apt-get install -y postgresql-client
-
-COPY . .
-
-CMD ["python", "extract_and_load.py"]
+# execução da consulta
+cur = conn.cursor()
+cur.execute("SELECT * FROM table;")
+rows = cur.fetchall()
+for row in rows:
+    print(row)
